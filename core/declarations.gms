@@ -739,7 +739,7 @@ sm_tgch4_2_pgc = s_gwpCH4 * (12/44) * 0.001;
 *** Parameters of a macro are replaced directly by the chosen value at compile time: they have nothing to do with the model parameters or sets.
 *** Because the replacement is automatic, please pay attention to brackets.
 
-*** macro_interpolate: Linear interpolation between two values x0 and x1 at time points t0 and t1 for an intermediate time point t
+*** m_interpolate: Linear interpolation between two values x0 and x1 at time points t0 and t1 for an intermediate time point t
 *** Example 1:
 ***   Suppose we use two different data sources for historical and projected population.
 ***   To avoid a sudden jump, we may interpolate between the two curves over the period 2005-2025:
@@ -747,6 +747,23 @@ sm_tgch4_2_pgc = s_gwpCH4 * (12/44) * 0.001;
 *** Example 2:
 ***   Suppose we have a subsidy that we want to phase out with a different date for each region.
 ***   p_subsidy(t,regi) = macro_interpolate(t.val, cm_startyear, p_subsidyEndYr(regi), p_subsidy(cm_startyear,regi), 0);
+*** Outside t0 and t1, the linear function is continued
+*** x0 _|         /
+***     |        /
+***     |       /
+*** x1 _|      /
+***     |_____/___________
+***            | |
+***          t0  t1
 $macro macro_interpolate(t,t0,t1,x0,x1) ( ((t1) - (t)) / ((t1) - (t0)) * (x0) + ((t) - (t0)) / ((t1) - (t0)) * (x1) )
 
+*** m_clamped_interpolate: Like m_interpolate, but if t is not between t0 and t1, we return the respective boundary value
+*** x0 _|         _____
+***     |        /
+***     |       /
+*** x1 _|______/
+***     |________________
+***            | |
+***          t0  t1
+$macro m_clamped_interpolate(t, t0, t1, x0, x1) ( (x0)$((t) <= (t0)) + (x1)$((t) >= (t1)) + ((x0) + ((x1) - (x0)) * ((t) - (t0)) / ((t1) - (t0)))$(((t) > (t0)) AND ((t) < (t1))))
 *** EOF ./core/declarations.gms
