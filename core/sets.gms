@@ -1052,7 +1052,7 @@ opTime5(opTimeYr) "actual lifetime of a built technology in years - 5 years time
 ;
 
 t(ttot) $ (ttot.val ge cm_startyear) = Yes;
-tsu(ttot) $ (ttot.val lt 2005) = Yes;
+tsu(ttot) $ (ttot.val lt cm_startyear) = Yes;
 display ttot;
 
 

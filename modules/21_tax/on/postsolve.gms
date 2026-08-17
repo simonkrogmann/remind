@@ -30,10 +30,11 @@ p21_taxrevCCS0(ttot,regi) = cm_frac_CCS
                             ));
 
 pm_taxrevNetNegEmi0(ttot,regi) = s21_frac_NetNegEmi * pm_taxCO2eqSum(ttot,regi) * ( (1 - cm_NetNegEmi_calculation) * vm_emiAllco2neg.l(ttot,regi) + cm_NetNegEmi_calculation * v21_emiAllco2neg_acrossIterations.l(ttot,regi) );
+p21_emiAllco2neg0(ttot,regi) = vm_emiAllco2neg.l(ttot,regi);
 p21_taxrevFE0(ttot,regi) = sum((entyFe,sector)$entyFe2Sector(entyFe,sector),
-    ( p21_tau_fe_tax(ttot,regi,sector,entyFe) + p21_tau_fe_sub(ttot,regi,sector,entyFe) ) 
-    * 
-    sum(emiMkt$sector2emiMkt(sector,emiMkt), 
+    ( p21_tau_fe_tax(ttot,regi,sector,entyFe) + p21_tau_fe_sub(ttot,regi,sector,entyFe) )
+    *
+    sum(emiMkt$sector2emiMkt(sector,emiMkt),
       sum(se2fe(entySe,entyFe,te),   
         vm_demFeSector.l(ttot,regi,entySe,entyFe,sector,emiMkt)
       )
@@ -51,12 +52,9 @@ p21_taxrevBio0(ttot,regi) = p21_taxrevBioSust0(ttot,regi) + p21_taxrevBioEF0(tto
 p21_taxemiMkt0(ttot,regi,emiMkt) = pm_taxemiMkt(ttot,regi,emiMkt) * vm_co2eqMkt.l(ttot,regi,emiMkt);
 p21_taxrevFlex0(ttot,regi)   =  sum(en2en(enty,enty2,te)$(teFlexTax(te)),
                                         - vm_flexAdj.l(ttot,regi,te) * vm_demSe.l(ttot,regi,enty,enty2,te));
-
 p21_taxrevImport0(ttot,regi,tradePe,tax_import_type_21) =  p21_tau_Import(ttot,regi,tradePe,tax_import_type_21)$sameas(tax_import_type_21, "worldPricemarkup") * pm_pvp(ttot,tradePe) / pm_pvp(ttot,"good") * vm_Mport.l(ttot,regi,tradePe)+
-  p21_tau_Import(ttot, regi, tradePe, tax_import_type_21)$sameas(tax_import_type_21, "CO2taxmarkup") * pm_taxCO2eqSum(ttot,regi) * pm_cintraw(tradePe) *  vm_Mport.l(ttot,regi,tradePe)+
-  p21_tau_Import(ttot, regi, tradePe, tax_import_type_21)$sameas(tax_import_type_21, "avCO2taxmarkup") * max(pm_taxCO2eqSum(ttot,regi), sum(regi2, pm_taxCO2eqSum(ttot,regi2))/(card(regi2))) * pm_cintraw(tradePe) *  vm_Mport.l(ttot,regi,tradePe);
-
-
+p21_tau_Import(ttot, regi, tradePe, tax_import_type_21)$sameas(tax_import_type_21, "CO2taxmarkup") * pm_taxCO2eqSum(ttot,regi) * pm_cintraw(tradePe) * vm_Mport.l(ttot,regi,tradePe)+
+p21_tau_Import(ttot, regi, tradePe, tax_import_type_21)$sameas(tax_import_type_21, "avCO2taxmarkup") * max(pm_taxCO2eqSum(ttot,regi), sum(regi2, pm_taxCO2eqSum(ttot,regi2))/(card(regi2))) * pm_cintraw(tradePe) * vm_Mport.l(ttot,regi,tradePe);
 
 p21_taxrevChProdStartYear0(t,regi) = sum(en2en(enty,enty2,te), vm_changeProdStartyearCost.l(t,regi,te)$( (t.val gt 2005) AND (t.val eq cm_startyear ) ) );
 p21_taxrevSE0(t,regi) =     sum(se2se(enty,enty2,te)$(teSeTax(te)), 
@@ -66,13 +64,11 @@ p21_taxrevEI0(t,regi) = sum(entyPe, pm_taxEI_PE(t,regi,entyPe) * vm_prodPe.l(t,r
                       + sum(pe2se(enty,enty2,te), pm_taxEI_SE(t,regi,te) * vm_prodSe.l(t,regi,enty,enty2,te))
                       + sum(se2se(enty,enty2,te), pm_taxEI_SE(t,regi,te) * vm_prodSe.l(t,regi,enty,enty2,te))
                       + sum(te2rlf(te,rlf), pm_taxEI_cap(t,regi,te) * vm_deltaCap.l(t,regi,te,rlf));
-    
 
 *** Save reference level of tax revenues for each iteration
 p21_taxrevGHG_iter(iteration+1,ttot,regi) = v21_taxrevGHG.l(ttot,regi);
 p21_taxrevCCS_iter(iteration+1,ttot,regi) = v21_taxrevCCS.l(ttot,regi); 
 p21_taxrevNetNegEmi_iter(iteration+1,ttot,regi) = v21_taxrevNetNegEmi.l(ttot,regi);
-p21_emiAllco2neg0(ttot,regi) = vm_emiAllco2neg.l(ttot,regi);
 p21_taxrevFE_iter(iteration+1,ttot,regi) = v21_taxrevFE.l(ttot,regi); 
 p21_taxrevResEx_iter(iteration+1,ttot,regi) = v21_taxrevResEx.l(ttot,regi);
 p21_taxrevPE_iter(iteration+1,ttot,regi,entyPe) = v21_taxrevPE.l(ttot,regi,entyPe);

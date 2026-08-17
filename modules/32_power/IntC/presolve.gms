@@ -7,9 +7,6 @@
 *** SOF ./modules/32_power/IntC/presolve.gms
 
 *** calculation of SE electricity price (useful for internal use and reporting purposes)
-pm_SEPrice(t,regi,entySe)$(    abs(qm_budget.m(t,regi)) gt sm_eps
-                           AND sameas(entySe,"seel") )
-  = q32_balSe.m(t,regi,entySe)
-  / qm_budget.m(t,regi);
-
+pm_SEPrice(t,regi,entySe)$( abs(qm_budget.m(t,regi)) gt sm_eps AND sameas(entySe,"seel") )
+    = q32_balSe.m(t,regi,entySe) / qm_budget.m(t,regi);
 *** EOF ./modules/32_power/IntC/presolve.gms
