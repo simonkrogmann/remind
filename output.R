@@ -37,6 +37,7 @@ library(optparse)
 library(lucode2)
 library(gms)
 library(glue)
+library(modelstats)
 require(stringr, quietly = TRUE)
 
 # Import all functions from the scripts/start folder
@@ -203,13 +204,17 @@ chooseOutputDirs <- function(output, remind_dir) {
     dir_folder <- trimws(unlist(strsplit(remind_dir, ",")))
     dir_folder <- c(file.path(dir_folder, "output"), dir_folder)
   }
-  dirs <- dirname(Sys.glob(file.path(dir_folder, "*", "fulldata.gdx")))
-  if (needingMif) dirs <- intersect(dirs, unique(dirname(Sys.glob(file.path(dir_folder, "*", "REMIND_generic_*.mif")))))
+  dirs <- Sys.glob(file.path(dir_folder, "*"))
+  dirStatus <- modelstats::getRunStatus(dirs, detailed = FALSE)
+  inProgress <- rownames(dirStatus[dirStatus["RunStatus"] == "Run in progress", ])
+  completed <- rownames(dirStatus[dirStatus["RunStatus"] == "Normal completion", ])
+  if (needingMif) dirs <- intersect(completed, unique(dirname(Sys.glob(file.path(dir_folder, "*", "REMIND_generic_*.mif")))))
+  dirs <- c(crayon::cyan(inProgress), completed)
   dirnames <- if (length(dir_folder) == 1) basename(dirs) else dirs
   names(dirnames) <- stringr::str_extract(dirnames, "rem-[0-9]+$")
   names(dirnames)[is.na(names(dirnames))] <- ""
   if (length(dirnames) == 0) {
-    stop("No directories found containing gdx", if (needingMif) " and mif", " files. Aborting.")
+    stop("No directories found with completed runs", if (needingMif) " and mif files", ". Aborting.")
   }
   selectedDirs <- chooseFromList(dirnames, type = glue::glue("runs to be used for output generation ({bold('--outputdirs')})"),
                     userinfo = paste0(if ("policyCosts" %in% output) "The reference run will be selected separately! " else NULL,
@@ -352,6 +357,37 @@ runSingle <- function(output, outputdirs, slurmConfig, interactiveSession, test)
   return(errors)
 }
 
+getSlurmDependency <- function(job_name, type = "afterok") {
+  rawOutput <- system2(
+    "squeue",
+    args = c("--me", glue("--name={shQuote(job_name)}"), "--noheader", "--format=%i"),
+    stdout = TRUE
+  )
+
+  jobIDs <- trimws(rawOutput)
+  jobIDs <- jobIDs[jobIDs != ""]
+
+  if (length(jobIDs) == 0) {
+    stop(glue("No running or pending Slurm job found with name: '{job_name}'"))
+  } else if (length(jobIDs) > 1) {
+    stop(glue(
+      "Multiple jobs found for name '{job_name}'. ",
+      "Using the latest Job ID: {last(jobIDs)}"
+    ))
+  }
+  return(glue(" --dependency={type}:{job_id}"))
+}
+
+addJobDependencies <- function(slurmConfig, outputdirs) {
+  dirStatus <- modelstats::getRunStatus(outputdirs, detailed = FALSE)
+  for (dir in outputdirs) {
+    if (!dirStatus[dir, "inSlurm"] %in% c("no", NA, FALSE)) {
+      slurmConfig <- paste0(slurmConfig, getSlurmDependency(basename(dir)))
+    }
+  }
+  return(slurmConfig)
+}
+
 #' main function of the script
 #' prompts the user for all required information to start an output script
 #'
@@ -369,7 +405,7 @@ output <- function(args) {
   remind_dir <- if (is.null(args[["remind_dir"]])) NULL                                           else unlist(strsplit(args[["remind_dir"]], ","))
   comp       <- if (is.null(args[["comp"]]))       chooseCompMode()                               else args[["comp"]]
   output     <- if (is.null(args[["output"]]))     chooseOutputScript(comp)                       else unlist(strsplit(args[["output"]], ","))
-  outputdirs <- if (is.null(args[["outputdirs"]]))  chooseOutputDirs(output, args[["remind_dir"]]) else unlist(strsplit(args[["outputdirs"]], ","))
+  outputdirs <- if (is.null(args[["outputdirs"]])) chooseOutputDirs(output, args[["remind_dir"]]) else unlist(strsplit(args[["outputdirs"]], ","))
 
   if (comp %in% c("comparison", "export")) {
     # aliases are names for scenarios (=outputdirs) that are prompted when the scenarios have duplicate names
@@ -389,7 +425,7 @@ output <- function(args) {
         filename_prefix <- ""
       }
     } else {
-      filename_prefix = args[["filename_prefix"]]
+      filename_prefix <- args[["filename_prefix"]]
     }
 
     # choose the slurm options. If you use command line arguments, use slurmConfig=priority or standby
@@ -400,8 +436,9 @@ output <- function(args) {
       } else if (args[["slurmConfig"]] %in% c("priority", "short", "standby")) {
         slurmConfig <- paste0("--qos=", args[["slurmConfig"]])
       } else {
-        slurmConfig = args[["slurmConfig"]]
+        slurmConfig <- args[["slurmConfig"]]
       }
+      slurmConfig <- addJobDependencies(slurmConfig, outputdirs)
     }
     errors = runComparisonOrExport(comp, output, outputdirs, aliases, filename_prefix, slurmConfig, args[["test"]])
   } else if (comp %in% c("single")) {
@@ -419,8 +456,9 @@ output <- function(args) {
     } else if (isTRUE(args[["slurmConfig"]] %in% "direct")) {
       interactiveSession <- TRUE
     } else {
-      slurmConfig = args[["slurmConfig"]]
+      slurmConfig <- args[["slurmConfig"]]
     }
+    slurmConfig <- addJobDependencies(slurmConfig, outputdirs)
     errors = runSingle(output, outputdirs, slurmConfig, interactiveSession, args[["test"]])
   } else {
     stop("Comparison mode not supported")
