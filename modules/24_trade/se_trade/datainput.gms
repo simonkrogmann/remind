@@ -50,16 +50,16 @@ loop( (ttot,ttot2,ext_regi,ext_regi2,entySe)$(p24_trade_exog(ttot,ttot2,ext_regi
       p24_seTradeCapacity(t,regi,regi2,entySe)$(t.val ge ttot2.val)=
         p24_trade_exog(ttot,ttot2,ext_regi,ext_regi2,entySe)
           * sm_EJ_2_TWa
-          * pm_gdp(t,regi) / sum(regi3$(regi_groupExt(ext_regi,regi3)),pm_gdp(t,regi3))
-          * pm_gdp(t,regi2) / sum(regi4$(regi_groupExt(ext_regi2,regi4)),pm_gdp(t,regi4));
+          * macro_gdpShare(t, regi_groupExt, ext_regi, regi)
+          * macro_gdpShare(t, regi_groupExt, ext_regi2, regi2);
 *** define ramp-up of trade quantities, linear increase from ttot (start year) to ttot2 (end year), 
 *** ttot should have first non-zero values
       p24_seTradeCapacity(t,regi,regi2,entySe)$(t.val ge (ttot.val-pm_ts(ttot))
                                             AND t.val lt ttot2.val) =
         p24_trade_exog(ttot,ttot2,ext_regi,ext_regi2,entySe)
         * sm_EJ_2_TWa
-        * pm_gdp(t,regi) / sum(regi3$(regi_groupExt(ext_regi,regi3)),pm_gdp(t,regi3))
-        * pm_gdp(t,regi2) / sum(regi4$(regi_groupExt(ext_regi2,regi4)),pm_gdp(t,regi4))
+        * macro_gdpShare(t, regi_groupExt, ext_regi, regi)
+        * macro_gdpShare(t, regi_groupExt, ext_regi2, regi2)
         * ((t.val - (ttot.val-pm_ts(ttot))) / (ttot2.val - (ttot.val-pm_ts(ttot))));
     );
   );
@@ -71,8 +71,8 @@ p24_seTrade_Quantity(regi,regi2,entySe) = 0;
 
 $ifthen.import_h2_EU "%cm_import_EU%" == "bal"
 *** EU
-  p24_seTrade_Quantity("MEA",regi2,"seh2")$(regi_group("EU27_regi",regi2)) = 1*sm_EJ_2_TWa*pm_gdp("2015",regi2) / sum(regi3$(regi_group("EU27_regi",regi3)),pm_gdp("2015",regi3));
-  p24_seTrade_Quantity("MEA",regi2,"seliqsyn")$(regi_group("EU27_regi",regi2)) = 1*sm_EJ_2_TWa*pm_gdp("2015",regi2) / sum(regi3$(regi_group("EU27_regi",regi3)),pm_gdp("2015",regi3));
+  p24_seTrade_Quantity("MEA",regi2,"seh2")$(regi_group("EU27_regi",regi2)) = 1*sm_EJ_2_TWa*macro_gdpShare("2015", regi_group, "EU27_regi", regi2);
+  p24_seTrade_Quantity("MEA",regi2,"seliqsyn")$(regi_group("EU27_regi",regi2)) = 1*sm_EJ_2_TWa*macro_gdpShare("2015", regi_group, "EU27_regi", regi2);
 
 
 $ifthen.import_h2_ariadne "%cm_import_ariadne%" == "on"
@@ -88,8 +88,8 @@ $endif.import_h2_EU
 
 $ifthen.import_h2_EU "%cm_import_EU%" == "low_elec"
 *** EU
-  p24_seTrade_Quantity("MEA",regi2,"seh2")$(regi_group("EU27_regi",regi2)) = 0.5*sm_EJ_2_TWa*pm_gdp("2015",regi2) / sum(regi3$(regi_group("EU27_regi",regi3)),pm_gdp("2015",regi3));
-  p24_seTrade_Quantity("MEA",regi2,"seliqsyn")$(regi_group("EU27_regi",regi2)) = 0.5*sm_EJ_2_TWa*pm_gdp("2015",regi2) / sum(regi3$(regi_group("EU27_regi",regi3)),pm_gdp("2015",regi3));
+  p24_seTrade_Quantity("MEA",regi2,"seh2")$(regi_group("EU27_regi",regi2)) = 0.5*sm_EJ_2_TWa*macro_gdpShare("2015", regi_group, "EU27_regi", regi2);
+  p24_seTrade_Quantity("MEA",regi2,"seliqsyn")$(regi_group("EU27_regi",regi2)) = 0.5*sm_EJ_2_TWa*macro_gdpShare("2015", regi_group, "EU27_regi", regi2);
 
 $ifthen.import_h2_ariadne "%cm_import_ariadne%" == "on"
 *** Germany (overrides value from EU above)  
@@ -100,8 +100,8 @@ $endif.import_h2_EU
 
 $ifthen.import_h2_EU "%cm_import_EU%" == "high_elec"
 *** EU
-  p24_seTrade_Quantity("MEA",regi2,"seh2")$(regi_group("EU27_regi",regi2)) = 1*sm_EJ_2_TWa*pm_gdp("2015",regi2) / sum(regi3$(regi_group("EU27_regi",regi3)),pm_gdp("2015",regi3));
-  p24_seTrade_Quantity("MEA",regi2,"seliqsyn")$(regi_group("EU27_regi",regi2)) = 4*sm_EJ_2_TWa*pm_gdp("2015",regi2) / sum(regi3$(regi_group("EU27_regi",regi3)),pm_gdp("2015",regi3));
+  p24_seTrade_Quantity("MEA",regi2,"seh2")$(regi_group("EU27_regi",regi2)) = 1*sm_EJ_2_TWa*macro_gdpShare("2015", regi_group, "EU27_regi", regi2);
+  p24_seTrade_Quantity("MEA",regi2,"seliqsyn")$(regi_group("EU27_regi",regi2)) = 4*sm_EJ_2_TWa*macro_gdpShare("2015", regi_group, "EU27_regi", regi2);
 
 $ifthen.import_h2_ariadne "%cm_import_ariadne%" == "on"
 *** Germany (overrides value from EU above)  
@@ -113,7 +113,7 @@ $endif.import_h2_EU
 
 $ifthen.import_h2_EU "%cm_import_EU%" == "low_h2"
 *** EU
-  p24_seTrade_Quantity("MEA",regi2,"seh2")$(regi_group("EU27_regi",regi2)) = 1*sm_EJ_2_TWa*pm_gdp("2015",regi2) / sum(regi3$(regi_group("EU27_regi",regi3)),pm_gdp("2015",regi3));
+  p24_seTrade_Quantity("MEA",regi2,"seh2")$(regi_group("EU27_regi",regi2)) = 1*sm_EJ_2_TWa*macro_gdpShare("2015", regi_group, "EU27_regi", regi2);
 
 $ifthen.import_h2_ariadne "%cm_import_ariadne%" == "on"
 *** Germany (overrides value from EU above)  
@@ -124,7 +124,7 @@ $endif.import_h2_EU
 
 $ifthen.import_h2_EU "%cm_import_EU%" == "high_h2"
 *** EU
-  p24_seTrade_Quantity("MEA",regi2,"seh2")$(regi_group("EU27_regi",regi2)) = 5*sm_EJ_2_TWa*pm_gdp("2015",regi2) / sum(regi3$(regi_group("EU27_regi",regi3)),pm_gdp("2015",regi3));
+  p24_seTrade_Quantity("MEA",regi2,"seh2")$(regi_group("EU27_regi",regi2)) = 5*sm_EJ_2_TWa*macro_gdpShare("2015", regi_group, "EU27_regi", regi2);
 
 $ifthen.import_h2_ariadne "%cm_import_ariadne%" == "on"
 *** Germany (overrides value from EU above)  
@@ -136,8 +136,8 @@ $endif.import_h2_EU
 
 $ifthen.import_h2_EU "%cm_import_EU%" == "low_synf"
 *** EU
-  p24_seTrade_Quantity("MEA",regi2,"seliqsyn")$(regi_group("EU27_regi",regi2)) = 0.75*sm_EJ_2_TWa*pm_gdp("2015",regi2) / sum(regi3$(regi_group("EU27_regi",regi3)),pm_gdp("2015",regi3));
-  p24_seTrade_Quantity("MEA",regi2,"segasyn")$(regi_group("EU27_regi",regi2)) = 0.25*sm_EJ_2_TWa*pm_gdp("2015",regi2) / sum(regi3$(regi_group("EU27_regi",regi3)),pm_gdp("2015",regi3));
+  p24_seTrade_Quantity("MEA",regi2,"seliqsyn")$(regi_group("EU27_regi",regi2)) = 0.75*sm_EJ_2_TWa*macro_gdpShare("2015", regi_group, "EU27_regi", regi2);
+  p24_seTrade_Quantity("MEA",regi2,"segasyn")$(regi_group("EU27_regi",regi2)) = 0.25*sm_EJ_2_TWa*macro_gdpShare("2015", regi_group, "EU27_regi", regi2);
 
 $ifthen.import_h2_ariadne "%cm_import_ariadne%" == "on"
 *** Germany (overrides value from EU above) 
@@ -148,8 +148,8 @@ $endif.import_h2_EU
 
 $ifthen.import_h2_EU "%cm_import_EU%" == "high_synf"
 *** EU
-  p24_seTrade_Quantity("MEA",regi2,"seliqsyn")$(regi_group("EU27_regi",regi2)) = 3.5*sm_EJ_2_TWa*pm_gdp("2015",regi2) / sum(regi3$(regi_group("EU27_regi",regi3)),pm_gdp("2015",regi3));
-  p24_seTrade_Quantity("MEA",regi2,"segasyn")$(regi_group("EU27_regi",regi2)) = 1.5*sm_EJ_2_TWa*pm_gdp("2015",regi2) / sum(regi3$(regi_group("EU27_regi",regi3)),pm_gdp("2015",regi3));
+  p24_seTrade_Quantity("MEA",regi2,"seliqsyn")$(regi_group("EU27_regi",regi2)) = 3.5*sm_EJ_2_TWa*macro_gdpShare("2015", regi_group, "EU27_regi", regi2);
+  p24_seTrade_Quantity("MEA",regi2,"segasyn")$(regi_group("EU27_regi",regi2)) = 1.5*sm_EJ_2_TWa*macro_gdpShare("2015", regi_group, "EU27_regi", regi2);
 
 $ifthen.import_h2_ariadne "%cm_import_ariadne%" == "on"
 *** Germany (overrides value from EU above) 

@@ -2329,7 +2329,9 @@ alias(entyFe,entyFe2);
 alias(teEs,teEs2);
 alias(esty,esty2);
 alias(rlf,rlf2);
-alias(regi,regi2,regi3,regi4);
+*** regi_macro is reserved as the dummy index of macro_gdpShare (core/declarations.gms).
+*** Do not use it as a loop index: GAMS raises error 125 if it is under control twice.
+alias(regi,regi2,regi3,regi4,regi_macro);
 alias(steps,steps2);
 alias(all_emiMkt,emiMkt,emiMkt2);
 alias(all_emiMktExt,emiMktExt);

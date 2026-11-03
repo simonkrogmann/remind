@@ -771,4 +771,18 @@ $macro macro_interpolate(t,t0,t1,x0,x1) ( ((t1) - (t)) / ((t1) - (t0)) * (x0) + 
 ***          t0  t1
 $macro macro_clamped_interpolate(t, t0, t1, x0, x1) ( (x0)$((t) <= (t0)) + (x1)$((t) >= (t1)) + ((x0) + ((x1) - (x0)) * ((t) - (t0)) / ((t1) - (t0)))$(((t) > (t0)) AND ((t) < (t1))))
 
+*** macro_gdpShare: share of the GDP of one region in the GDP of a region group (e.g. EU27_regi),
+*** used to distribute a quantity that is defined for the group onto its member regions.
+*** The dummy index regi_macro is reserved for this macro (see core/sets.gms), the caller must
+*** not loop over it (that would give error 125, so a clash cannot pass unnoticed).
+*** mapping is regi_group or regi_groupExt, both mapping group -> member regions. regi_group lists
+*** only real groups (GLO, EUR_regi, EU27_regi) and their H12 members; regi_groupExt additionally
+*** maps every model region onto itself, so a switch holding a single region works as well.
+*** Choose deliberately, the two give different denominators. Time index and group may be quoted.
+***   p24_seTradeCapacity(t,regi,regi2,entySe) = quantity * macro_gdpShare(t, regi_groupExt, ext_regi, regi)
+***                                                      * macro_gdpShare(t, regi_groupExt, ext_regi2, regi2);
+***   p24_seTrade_Quantity("MEA",regi2,"seh2")$(regi_group("EU27_regi",regi2)) =
+***     1 * sm_EJ_2_TWa * macro_gdpShare("2015", regi_group, "EU27_regi", regi2);
+$macro macro_gdpShare(t,mapping,group,regi) ( pm_gdp(t,regi) / sum(regi_macro$(mapping(group,regi_macro)), pm_gdp(t,regi_macro)) )
+
 *** EOF ./core/declarations.gms
