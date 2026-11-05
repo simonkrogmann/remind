@@ -1568,6 +1568,7 @@ teRegTechCosts(all_te) "all technologies for which we differantiate tech costs b
     csp
 ***       wind
     windon
+    windoff
 /
 
 teFlex(all_te)       "all technologies which can benefit from flexibility tax"
