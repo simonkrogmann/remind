@@ -13,3 +13,15 @@ netCDF4>=1.6.0
 # No new numpy, no old pandas
 numpy<3
 pandas>2
+
+# POSTED (Potsdam open-source techno-economic database), used to fetch individual
+# technology data values in core/datainput.gms via embedded Python code. The GAMS
+# embedded code facility runs GMSPython, so the packages actually imported during
+# a run live in config/pylibs (recreate with):
+#   uv pip install --python <GMSPython> --target config/pylibs \
+#     "posted @ git+https://github.com/PhilippVerpoort/posted.git@main" \
+#     "cet-units @ git+https://github.com/PhilippVerpoort/cet-units.git@v0.3.0" \
+#     "pint>=0.24.4" "pandas>=2.3.3,<3"
+# This entry records the exact version used for provenance and makes POSTED
+# available in the R/reticulate environment as well.
+posted @ git+https://github.com/PhilippVerpoort/posted.git@a1e4e8d16d9c878226b7a7e06da25bfdb0b2f22c

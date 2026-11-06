@@ -136,6 +136,45 @@ $include "./core/input/generisdata_tech.prn"
 $include "./core/input/generisdata_trade.prn"
 ;
 
+*** ---------------------------------------------------------------------------
+*** Individual technology values fetched from POSTED (https://github.com/
+*** PhilippVerpoort/posted), the Potsdam open-source techno-economic database,
+*** via embedded Python code. Each value is queried right here, choosing
+*** technology, subtechnology, period and units at the place where it is
+*** used; scripts/input/postedremind.py performs the query and unit
+*** conversion, and config/posted-values.log archives every applied value
+*** with its sources. If POSTED cannot provide a value, the query raises and
+*** the run fails explicitly. Add further values by copying one of the blocks
+*** below to the spot where they are needed.
+*** ---------------------------------------------------------------------------
+
+*** Hydrogen electrolysis inco0: POSTED CAPEX per kW electricity, divided by
+*** the POSTED efficiency to arrive at USD[2015] per kW(H2) like in the .prn.
+Scalar s_posted_inco0_elh2 "inco0 elh2 from POSTED, USD[2015]/kW(H2)";
+
+$onEmbeddedCode Python:
+import sys; sys.path.insert(0, "scripts/input"); import postedremind as pr
+capex = pr.get_value("Tech|Electrolysis", "CAPEX", subtech = ["AEL", "PEM"], period = 2025, target_unit = "USD_2015 / kW")
+eta = pr.get_value("Tech|Electrolysis", "Output|Hydrogen", subtech = ["AEL", "PEM"], period = 2025, target_unit = "kWh_H2_LHV / kWh")
+gams.set("s_posted_inco0_elh2", [round(capex / eta, 6)])
+pr.log("inco0,elh2 = %.6g USD_2015/kW(H2) = CAPEX %.6g USD_2015/kW(el) / eta %.6g (Tech|Electrolysis CAPEX and Output|Hydrogen, AEL+PEM, 2025)" % (capex / eta, capex, eta))
+$offEmbeddedCode s_posted_inco0_elh2
+
+fm_dataglob("inco0","elh2") = s_posted_inco0_elh2;
+
+*** Hydrogen electrolysis eta: POSTED hydrogen output per unit of electricity
+*** input on lower heating value basis, directly the dimensionless efficiency.
+Scalar s_posted_eta_elh2 "eta elh2 from POSTED, dimensionless";
+
+$onEmbeddedCode Python:
+import sys; sys.path.insert(0, "scripts/input"); import postedremind as pr
+eta = pr.get_value("Tech|Electrolysis", "Output|Hydrogen", subtech = ["AEL", "PEM"], period = 2025, target_unit = "kWh_H2_LHV / kWh")
+gams.set("s_posted_eta_elh2", [round(eta, 6)])
+pr.log("eta,elh2 = %.6g kWh_H2_LHV/kWh (Tech|Electrolysis Output|Hydrogen, AEL+PEM, 2025)" % eta)
+$offEmbeddedCode s_posted_eta_elh2
+
+fm_dataglob("eta","elh2") = s_posted_eta_elh2;
+
 *** TODO: merge all grid types into one
 fm_dataglob(char,teGrid) = fm_dataglob(char,"gridwindon");
 
