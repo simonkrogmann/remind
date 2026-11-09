@@ -1,8 +1,7 @@
 on:
-  pull_request_target:
+  push:
     branches:
       - develop
-    types: [ closed ]
 name: auto-dev-version
 
 permissions:
@@ -14,7 +13,9 @@ concurrency:
 
 jobs:
   auto-dev-version:
-    if: github.repository == 'remindmodel/remind' && github.event.pull_request.merged == true
+    if: >-
+      github.repository == 'simonkrogmann/remind' &&
+      github.event.head_commit.author.name != 'REMIND Research Software Engineering'
     runs-on: ubuntu-26.04
     steps:
       - name: Checkout
