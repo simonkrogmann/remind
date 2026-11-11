@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - develop
+      - security
 name: auto-dev-version
 
 permissions:
@@ -14,14 +14,14 @@ concurrency:
 jobs:
   auto-dev-version:
     if: >-
-      github.repository == 'remindmodel/remind' &&
+      github.repository == 'simonkrogmann/remind' &&
       !startsWith(github.event.head_commit.message, 'Release development version')
     runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: refs/heads/develop
+          ref: refs/heads/security
           fetch-depth: 0
           persist-credentials: false
 
@@ -66,4 +66,4 @@ jobs:
           git commit -m "Release development version $VERSION"
           git tag "v$VERSION"
           AUTH="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
-          git -c http.extraHeader="Authorization: Basic ${AUTH}" push --atomic "https://github.com/${GITHUB_REPOSITORY}.git" HEAD:develop "v$VERSION"
+          git -c http.extraHeader="Authorization: Basic ${AUTH}" push --atomic "https://github.com/${GITHUB_REPOSITORY}.git" HEAD:security "v$VERSION"
