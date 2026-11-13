@@ -139,6 +139,28 @@ $include "./core/input/generisdata_trade.prn"
 *** TODO: merge all grid types into one
 fm_dataglob(char,teGrid) = fm_dataglob(char,"gridwindon");
 
+***---------------------------------------------------------------------------
+*** Techno-economic data fetched from POSTED, the Potsdam open-source techno-
+*** economic database (https://github.com/PhilippVerpoort/posted), by
+*** technoeconomic/posted.py and scripts/input/create_input_for_technoeconomic.R.
+*** Values are medians across all sources, the pinned POSTED commit is recorded
+*** in the header of the data file and in cfg$postedVersion.
+***---------------------------------------------------------------------------
+parameter p_technoeconomic(char,all_te,tall,all_regi) "technology properties fetched from POSTED, medians across sources, investment costs in USD[2017]/kW"
+/
+$ondelim
+$include "./core/input/technoeconomic.csv"
+$offdelim
+/
+;
+
+*** Overwrite electrolysis data with POSTED values for 2025 (identical across
+*** regions until POSTED provides regional data), as an example of how
+*** p_technoeconomic can replace values from generisdata_tech.prn.
+*** Attention: POSTED values are USD[2017], generisdata_tech.prn USD[2015].
+fm_dataglob("inco0", "elh2") = sum(all_regi, p_technoeconomic("inco0","elh2","2025",all_regi)) / card(all_regi);
+fm_dataglob("eta",   "elh2") = sum(all_regi, p_technoeconomic("eta",  "elh2","2025",all_regi)) / card(all_regi);
+
 
 parameter p_inco0(ttot,all_regi,all_te)     "regionalized technology costs Unit: USD$/kW"
 /
@@ -465,12 +487,8 @@ loop(te $ (teNoLearn(te) and teRegTechCosts(te)),
 
 *** from 2025 to c_teNoLearnConvEndYr, apply linear convergence of investment costs so that
 *** all regions converge and stabilise at the technology cost data given in generisdata.prn
-  loop(ttot $ (ttot.val > 2020 and ttot.val < c_teNoLearnConvEndYr),
-    pm_inco0_t(ttot,regi,te)
-      = macro_interpolate(ttot.val, 2020, c_teNoLearnConvEndYr, p_inco0("2020",regi,te), fm_dataglob("inco0",te))
-  );
-
-  pm_inco0_t(ttot,regi,te) $ (ttot.val >= c_teNoLearnConvEndYr) = fm_dataglob("inco0",te);
+  pm_inco0_t(ttot,regi,te) $ (ttot.val > 2020)
+      = macro_clamped_interpolate(ttot.val, 2020, c_teNoLearnConvEndYr, p_inco0("2020",regi,te), fm_dataglob("inco0",te));
 );
 
 

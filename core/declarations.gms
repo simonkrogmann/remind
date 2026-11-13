@@ -759,23 +759,32 @@ sm_tgch4_2_pgc = s_gwpCH4 * (12/44) * 0.001;
 ***   Suppose we have a subsidy that we want to phase out with a different date for each region.
 ***   p_subsidy(t,regi) = macro_interpolate(t.val, cm_startyear, p_subsidyEndYr(regi), p_subsidy(cm_startyear,regi), 0);
 *** Outside t0 and t1, the linear function is continued
-*** x0 _|         /
+*** x1 _|         /
 ***     |        /
 ***     |       /
-*** x1 _|      /
+*** x0 _|      /
 ***     |_____/___________
 ***            | |
 ***          t0  t1
 $macro macro_interpolate(t,t0,t1,x0,x1) ( ((t1) - (t)) / ((t1) - (t0)) * (x0) + ((t) - (t0)) / ((t1) - (t0)) * (x1) )
 
 *** macro_clamped_interpolate: Like macro_interpolate, but if t is not between t0 and t1, we return the respective boundary value
-*** x0 _|         _____
+*** x1 _|         _____
 ***     |        /
 ***     |       /
-*** x1 _|______/
+*** x0 _|______/
 ***     |________________
 ***            | |
 ***          t0  t1
 $macro macro_clamped_interpolate(t, t0, t1, x0, x1) ( (x0)$((t) <= (t0)) + (x1)$((t) >= (t1)) + ((x0) + ((x1) - (x0)) * ((t) - (t0)) / ((t1) - (t0)))$(((t) > (t0)) AND ((t) < (t1))))
+
+*** macro_runtimeLog: write one line with the current wall-clock time to runtime.log, followed
+*** by a label and the iteration number, so that the runtime of individual model parts can be
+*** reconstructed (see scripts/output/plotRuntime.R), e.g.:
+***   macro_runtimeLog("GAMS")
+***   macro_runtimeLog("run_KotzWenz_damages")
+*** Make sure the label contains no commas.
+*** Format of runtime.log: time, label, iteration
+$macro macro_runtimeLog(label) putclose runtime gyear(jnow):0:0 "-" gmonth(jnow):0:0 "-" gday(jnow):0:0 " " ghour(jnow):0:0 ":" gminute(jnow):0:0 ":" gsecond(jnow):0:0 ",",label,"," iteration.val:0;
 
 *** EOF ./core/declarations.gms

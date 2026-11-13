@@ -13,3 +13,10 @@ netCDF4>=1.6.0
 # No new numpy, no old pandas
 numpy<3
 pandas>2
+
+# POSTED (Potsdam open-source techno-economic database) and its unit registry,
+# used by technoeconomic/posted.py to fetch techno-economic data into
+# core/input/technoeconomic.csv. Keep the POSTED commit in sync with
+# cfg$postedVersion in config/default.cfg.
+posted @ git+https://github.com/PhilippVerpoort/posted.git@a1e4e8d16d9c878226b7a7e06da25bfdb0b2f22c
+cet-units @ git+https://github.com/PhilippVerpoort/cet-units.git@6ed93beb93001faccde30c14bd9b84ca1d594239
