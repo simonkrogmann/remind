@@ -29,7 +29,7 @@
 ## Checklist
 
 *Do not delete any line. Leave **unfinished** elements unchecked so others know how far along you are.\
-In the end all checkboxes must be ticked before you can merge*.
+In the end all checkboxes must be ticked before you can merge*. (You may leave this list unticked if only documentation was changed, i.e. files in `tutorials/` or `*.md`/`*.Rmd` files.)
 
 **Note:** *This is not required for documentation PRs that only touch `tutorials/` or `*.md`/`*.Rmd` files.*
 
