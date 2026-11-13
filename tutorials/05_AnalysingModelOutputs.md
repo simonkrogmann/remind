@@ -25,6 +25,8 @@ There are plentiful ways to look at and analyze REMIND results. This tutorial gi
 
 For each scenario, results are written to a folder that is created automatically as a combination of the **scenario title** name and the **current date** inside the **output** folder of the model.
 
+test
+
 ## 2. Model output files
 
 As mentioned in [tutorial 2 - RunningREMIND](02_RunningREMIND.md), the two main output files you will typically care about are the *fulldata.gdx* and the *REMIND_generic_NameofYourRun.mif* files in the *output* folder of your run. The *fulldata.gdx* is the actual technical output of the GAMS optimization and contains all the variables, parameters, sets etc. of the REMIND model (the differences between these GAMS objects are explained in tutorial 2 section 3c). However, this gdx-file is mainly interesting once you actually work on the GAMS code and want to check specific the variables and their values. If you simply want to look at REMIND results of your run or use it for further data analysis and plotting, you would open the *REMIND_generic_NameofYourRun.mif* which is basically a csv-file in a certain standardized format (called the model intercomparison file format) used in the Integrated Assessment Modeling community. Please refer to the `vignette("mif")` of the package *mip* (model intercomparison plots) to learn more about the mif format.
