@@ -42,17 +42,17 @@ p_emineg_econometric(regi,"n2owaste","p2")$(pm_gdp_gdx("2005",regi)/pm_pop("2005
 *** here to account for the 1990 quirk. Choosing 2005 keeps the old version,
 *** and any other choice assumes 2020. 
 $ifthen %cm_emifacs_baseyear% == "2005"
-p_emineg_econometric(regi,"n2owaste","p1") = p_macBase2005(regi,"n2owaste") / (pm_pop("2005",regi) * (1000*pm_gdp("2005",regi) / (pm_pop("2005",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"n2owaste","p2"));
-p_emineg_econometric(regi,"ch4wstl","p1")$(pm_gdp_gdx("2005",regi)/pm_pop("2005",regi) le 10) = p_macBase2005(regi,"ch4wstl") / (pm_pop("2005",regi) * (1000*pm_gdp("2005",regi) / (pm_pop("2005",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wstl","p2"));
-p_emineg_econometric(regi,"ch4wsts","p1")$(pm_gdp_gdx("2005",regi)/pm_pop("2005",regi) le 10) = p_macBase2005(regi,"ch4wsts") / (pm_pop("2005",regi) * (1000*pm_gdp("2005",regi) / (pm_pop("2005",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wsts","p2"));
-p_emineg_econometric(regi,"ch4wstl","p1")$(pm_gdp_gdx("2005",regi)/pm_pop("2005",regi) gt 10) = p_macBase1990(regi,"ch4wstl") / (pm_pop("1990",regi) * (1000*pm_gdp("1990",regi) / (pm_pop("1990",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wstl","p2"));
-p_emineg_econometric(regi,"ch4wsts","p1")$(pm_gdp_gdx("2005",regi)/pm_pop("2005",regi) gt 10) = p_macBase1990(regi,"ch4wsts") / (pm_pop("1990",regi) * (1000*pm_gdp("1990",regi) / (pm_pop("1990",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wsts","p2"));
+p_emineg_econometric(regi,"n2owaste","p1") = p_macBase2005(regi,"n2owaste") / (pm_pop("2005",regi) * (sm_TDpBillion_2_DpCapita * pm_gdp("2005",regi) / (pm_pop("2005",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"n2owaste","p2"));
+p_emineg_econometric(regi,"ch4wstl","p1")$(pm_gdp_gdx("2005",regi)/pm_pop("2005",regi) le 10) = p_macBase2005(regi,"ch4wstl") / (pm_pop("2005",regi) * (sm_TDpBillion_2_DpCapita * pm_gdp("2005",regi) / (pm_pop("2005",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wstl","p2"));
+p_emineg_econometric(regi,"ch4wsts","p1")$(pm_gdp_gdx("2005",regi)/pm_pop("2005",regi) le 10) = p_macBase2005(regi,"ch4wsts") / (pm_pop("2005",regi) * (sm_TDpBillion_2_DpCapita * pm_gdp("2005",regi) / (pm_pop("2005",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wsts","p2"));
+p_emineg_econometric(regi,"ch4wstl","p1")$(pm_gdp_gdx("2005",regi)/pm_pop("2005",regi) gt 10) = p_macBase1990(regi,"ch4wstl") / (pm_pop("1990",regi) * (sm_TDpBillion_2_DpCapita * pm_gdp("1990",regi) / (pm_pop("1990",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wstl","p2"));
+p_emineg_econometric(regi,"ch4wsts","p1")$(pm_gdp_gdx("2005",regi)/pm_pop("2005",regi) gt 10) = p_macBase1990(regi,"ch4wsts") / (pm_pop("1990",regi) * (sm_TDpBillion_2_DpCapita * pm_gdp("1990",regi) / (pm_pop("1990",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wsts","p2"));
 $else
-p_emineg_econometric(regi,"n2owaste","p1") = p_macBaseCEDS2020(regi,"n2owaste") / (pm_pop("%cm_emifacs_baseyear%",regi) * (1000*pm_gdp("%cm_emifacs_baseyear%",regi) / (pm_pop("%cm_emifacs_baseyear%",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"n2owaste","p2"));
-p_emineg_econometric(regi,"ch4wstl","p1")$(pm_gdp_gdx("%cm_emifacs_baseyear%",regi)/pm_pop("%cm_emifacs_baseyear%",regi) le 10) = p_macBaseCEDS2020(regi,"ch4wstl") / (pm_pop("%cm_emifacs_baseyear%",regi) * (1000*pm_gdp("%cm_emifacs_baseyear%",regi) / (pm_pop("%cm_emifacs_baseyear%",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wstl","p2"));
-p_emineg_econometric(regi,"ch4wsts","p1")$(pm_gdp_gdx("%cm_emifacs_baseyear%",regi)/pm_pop("%cm_emifacs_baseyear%",regi) le 10) = p_macBaseCEDS2020(regi,"ch4wsts") / (pm_pop("%cm_emifacs_baseyear%",regi) * (1000*pm_gdp("%cm_emifacs_baseyear%",regi) / (pm_pop("%cm_emifacs_baseyear%",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wsts","p2"));
-p_emineg_econometric(regi,"ch4wstl","p1")$(pm_gdp_gdx("%cm_emifacs_baseyear%",regi)/pm_pop("%cm_emifacs_baseyear%",regi) gt 10) = p_macBaseCEDS2020(regi,"ch4wstl") / (pm_pop("%cm_emifacs_baseyear%",regi) * (1000*pm_gdp("%cm_emifacs_baseyear%",regi) / (pm_pop("%cm_emifacs_baseyear%",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wstl","p2"));
-p_emineg_econometric(regi,"ch4wsts","p1")$(pm_gdp_gdx("%cm_emifacs_baseyear%",regi)/pm_pop("%cm_emifacs_baseyear%",regi) gt 10) = p_macBaseCEDS2020(regi,"ch4wsts") / (pm_pop("%cm_emifacs_baseyear%",regi) * (1000*pm_gdp("%cm_emifacs_baseyear%",regi) / (pm_pop("%cm_emifacs_baseyear%",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wsts","p2"));
+p_emineg_econometric(regi,"n2owaste","p1") = p_macBaseCEDS2020(regi,"n2owaste") / (pm_pop("%cm_emifacs_baseyear%",regi) * (sm_TDpBillion_2_DpCapita * pm_gdp("%cm_emifacs_baseyear%",regi) / (pm_pop("%cm_emifacs_baseyear%",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"n2owaste","p2"));
+p_emineg_econometric(regi,"ch4wstl","p1")$(pm_gdp_gdx("%cm_emifacs_baseyear%",regi)/pm_pop("%cm_emifacs_baseyear%",regi) le 10) = p_macBaseCEDS2020(regi,"ch4wstl") / (pm_pop("%cm_emifacs_baseyear%",regi) * (sm_TDpBillion_2_DpCapita * pm_gdp("%cm_emifacs_baseyear%",regi) / (pm_pop("%cm_emifacs_baseyear%",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wstl","p2"));
+p_emineg_econometric(regi,"ch4wsts","p1")$(pm_gdp_gdx("%cm_emifacs_baseyear%",regi)/pm_pop("%cm_emifacs_baseyear%",regi) le 10) = p_macBaseCEDS2020(regi,"ch4wsts") / (pm_pop("%cm_emifacs_baseyear%",regi) * (sm_TDpBillion_2_DpCapita * pm_gdp("%cm_emifacs_baseyear%",regi) / (pm_pop("%cm_emifacs_baseyear%",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wsts","p2"));
+p_emineg_econometric(regi,"ch4wstl","p1")$(pm_gdp_gdx("%cm_emifacs_baseyear%",regi)/pm_pop("%cm_emifacs_baseyear%",regi) gt 10) = p_macBaseCEDS2020(regi,"ch4wstl") / (pm_pop("%cm_emifacs_baseyear%",regi) * (sm_TDpBillion_2_DpCapita * pm_gdp("%cm_emifacs_baseyear%",regi) / (pm_pop("%cm_emifacs_baseyear%",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wstl","p2"));
+p_emineg_econometric(regi,"ch4wsts","p1")$(pm_gdp_gdx("%cm_emifacs_baseyear%",regi)/pm_pop("%cm_emifacs_baseyear%",regi) gt 10) = p_macBaseCEDS2020(regi,"ch4wsts") / (pm_pop("%cm_emifacs_baseyear%",regi) * (sm_TDpBillion_2_DpCapita * pm_gdp("%cm_emifacs_baseyear%",regi) / (pm_pop("%cm_emifacs_baseyear%",regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wsts","p2"));
 $endif
 
 display p_emineg_econometric;
@@ -253,7 +253,7 @@ loop(regi,
           );
     );
 
-p_priceCO2(ttot,regi) = pm_taxCO2eqSum(ttot,regi) * 1000;
+p_priceCO2(ttot,regi) = pm_taxCO2eqSum(ttot,regi) * sm_TDpGtC_2_DptC;
 
 *** Define co2 price for entities that are used in MAC.
 loop((enty,enty2)$emiMac2mac(enty,enty2), !! make sure that both mac sectors and mac curves have prices asigned as both sets are used in calculations below
@@ -266,13 +266,13 @@ $IFTHEN.emiMkt not "%cm_emiMktTarget%" == "off"
  loop(ext_regi$regiEmiMktTarget(ext_regi),
   loop(regi$regi_groupExt(ext_regi,regi),
 *** average CO2 price aggregated by FE
-    p_priceCO2(t,regi) = ( (sum(emiMkt, pm_taxemiMkt(t,regi,emiMkt) * sum((entySe,entyFe,sector)$(sefe(entySe,entyFe) AND entyFe2Sector(entyFe,sector) AND sector2emiMkt(sector,emiMkt)),vm_demFeSector.l(t,regi,entySe,entyFe,sector,emiMkt)))) / (sum((entySe,entyFe,sector,emiMkt)$(sefe(entySe,entyFe) AND entyFe2Sector(entyFe,sector) AND sector2emiMkt(sector,emiMkt)),vm_demFeSector.l(t,regi,entySe,entyFe,sector,emiMkt))) )*1000;
+    p_priceCO2(t,regi) = ( (sum(emiMkt, pm_taxemiMkt(t,regi,emiMkt) * sum((entySe,entyFe,sector)$(sefe(entySe,entyFe) AND entyFe2Sector(entyFe,sector) AND sector2emiMkt(sector,emiMkt)),vm_demFeSector.l(t,regi,entySe,entyFe,sector,emiMkt)))) / (sum((entySe,entyFe,sector,emiMkt)$(sefe(entySe,entyFe) AND entyFe2Sector(entyFe,sector) AND sector2emiMkt(sector,emiMkt)),vm_demFeSector.l(t,regi,entySe,entyFe,sector,emiMkt))) )*sm_TDpGtC_2_DptC;
     loop((enty,emiMkt)$(macSector2emiMkt(enty,emiMkt)),
       loop(enty2$emiMac2mac(enty,enty2), !! make sure that both mac sectors and mac curves have prices asigned as both sets are used in calculations below
-        p_priceCO2forMAC(t,regi,enty) = pm_taxemiMkt(t,regi,emiMkt)* 1000;
-        p_priceCO2forMAC(t,regi,enty2) = pm_taxemiMkt(t,regi,emiMkt)* 1000;
-        p_priceCO2forMAC(t,regi,"co2chemicals") = pm_taxemiMkt(t,regi,"ETS")* 1000;
-        p_priceCO2forMAC(t,regi,"co2steel") = pm_taxemiMkt(t,regi,"ETS")* 1000;
+        p_priceCO2forMAC(t,regi,enty) = pm_taxemiMkt(t,regi,emiMkt)* sm_TDpGtC_2_DptC;
+        p_priceCO2forMAC(t,regi,enty2) = pm_taxemiMkt(t,regi,emiMkt)* sm_TDpGtC_2_DptC;
+        p_priceCO2forMAC(t,regi,"co2chemicals") = pm_taxemiMkt(t,regi,"ETS")* sm_TDpGtC_2_DptC;
+        p_priceCO2forMAC(t,regi,"co2steel") = pm_taxemiMkt(t,regi,"ETS")* sm_TDpGtC_2_DptC;
       );
     );
   );
@@ -303,9 +303,9 @@ display p_priceCO2,p_priceCO2forMAC;
 ***--------------------------------------
 *** endogenous in equations.gms
 *** econometric
-v_macBase.fx(ttot,regi,"ch4wsts")$(ttot.val ge 2005) = p_emineg_econometric(regi,"ch4wsts","p1") * pm_pop(ttot,regi) * (1000*pm_gdp(ttot,regi) / (pm_pop(ttot,regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wsts","p2");
-v_macBase.fx(ttot,regi,"ch4wstl")$(ttot.val ge 2005) = p_emineg_econometric(regi,"ch4wstl","p1") * pm_pop(ttot,regi) * (1000*pm_gdp(ttot,regi) / (pm_pop(ttot,regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wstl","p2");
-v_macBase.fx(ttot,regi,"n2owaste")$(ttot.val ge 2005) = p_emineg_econometric(regi,"n2owaste","p1") * pm_pop(ttot,regi) * (1000*pm_gdp(ttot,regi) / (pm_pop(ttot,regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"n2owaste","p2");
+v_macBase.fx(ttot,regi,"ch4wsts")$(ttot.val ge 2005) = p_emineg_econometric(regi,"ch4wsts","p1") * pm_pop(ttot,regi) * (sm_TDpBillion_2_DpCapita * pm_gdp(ttot,regi) / (pm_pop(ttot,regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wsts","p2");
+v_macBase.fx(ttot,regi,"ch4wstl")$(ttot.val ge 2005) = p_emineg_econometric(regi,"ch4wstl","p1") * pm_pop(ttot,regi) * (sm_TDpBillion_2_DpCapita * pm_gdp(ttot,regi) / (pm_pop(ttot,regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"ch4wstl","p2");
+v_macBase.fx(ttot,regi,"n2owaste")$(ttot.val ge 2005) = p_emineg_econometric(regi,"n2owaste","p1") * pm_pop(ttot,regi) * (sm_TDpBillion_2_DpCapita * pm_gdp(ttot,regi) / (pm_pop(ttot,regi)*pm_shPPPMER(regi)))**p_emineg_econometric(regi,"n2owaste","p2");
 
 v_macBase.lo(ttot,regi,"co2cement_process")$( ttot.val ge 2005 ) = 0;
 

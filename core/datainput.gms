@@ -62,7 +62,7 @@ $ondelim
 $include "./core/input/f_pop.cs3r"
 $offdelim
 ;
-pm_pop(tall,all_regi) = f_pop(tall,all_regi,"%cm_GDPpopScen%") / 1000;  !! rescale unit from [million people] to [billion] people
+pm_pop(tall,all_regi) = f_pop(tall,all_regi,"%cm_GDPpopScen%") * sm_million_2_billion;  !! rescale unit from [million people] to [billion] people
 
 *** load labour data
 table f_lab(tall,all_regi,all_GDPpopScen)        "Labour data"
@@ -70,7 +70,7 @@ $ondelim
 $include "./core/input/f_lab.cs3r"
 $offdelim
 ;
-pm_lab(tall,all_regi) = f_lab(tall,all_regi,"%cm_GDPpopScen%") / 1000; !! rescale unit from [million people] to [billion] people
+pm_lab(tall,all_regi) = f_lab(tall,all_regi,"%cm_GDPpopScen%") * sm_million_2_billion; !! rescale unit from [million people] to [billion] people
 
 display pm_pop, pm_lab;
 
@@ -393,8 +393,8 @@ $elseif.floorscen %cm_floorCostScen% == "gdpBased"
 *'   - regions with infinitely low GDP have multiplier 0.5
 *'   - regions with infinitely high GDP have multiplier 1.5
 *' Compute GDP MER per capita in 2050 per region and the population-weighted global average [$/capita]
-  p_floorcostRef(regi) = pm_gdp("2050",regi) / pm_pop("2050",regi) * 1000;
-  p_floorcostRef_world = sum(regi, pm_gdp("2050",regi)) / sum(regi, pm_pop("2050",regi)) * 1000;
+  p_floorcostRef(regi) = pm_gdp("2050",regi) / pm_pop("2050",regi) * sm_TDpBillion_2_DpCapita;
+  p_floorcostRef_world = sum(regi, pm_gdp("2050",regi)) / sum(regi, pm_pop("2050",regi)) * sm_TDpBillion_2_DpCapita;
 *' As CHA is a leader in novel technologies, we assume a floorcost that corresponds to countries with half its actual GDP/cap
   p_floorcostRef(regi) $ (sameas(regi,"CHA")) = p_floorcostRef(regi) / 2;
 

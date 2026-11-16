@@ -651,12 +651,15 @@ scalars
 *** conversion between orders of magnitude
 sm_giga_2_non                "giga to non"                             /1e+9/,
 sm_trillion_2_non            "trillion to non"                         /1e+12/,
+sm_million_2_billion         "convert million to billion"              /0.001/,
+sm_tg_2_pg                   "convert teragram (Tg) to petagram (Pg)"  /0.001/,
 
 *** energy units
 s_ZJ_2_TWa                   "convert from Zeta Joule to Tera Watt annum"   /31.71/,
 sm_EJ_2_TWa                  "convert from Exa Joule to Tera Watt annum"    /31.71e-03/,
 sm_GJ_2_TWa                  "convert from Giga Joule to Tera Watt annum"   /31.71e-12/,
 sm_TWa_2_EJ                  "convert from Tera Watt annum to Exa Joule"    /31.54/,
+sm_TWa_2_ZJ                  "convert from Tera Watt annum to Zeta Joule"   /0.03154/,
 sm_DpGJ_2_TDpTWa             "convert $/GJ to T$/TWa"                       /31.54e-03/
 sm_TWa_2_TWh                 "convert Tera Watt annum to Tera Wh"           /8.76e+3/,
 sm_TWa_2_MWh                 "convert Tera Watt annum to Mega Wh"           /8.76e+9/,
@@ -668,6 +671,7 @@ sm_tBC_2_TWa                 "t biochar to TWa biochar (28700 [MJ/tBC]*10^-12[EJ
 *** emissions units
 sm_c_2_co2                   "convert mass from carbon to CO2 (44/12)" /3.66667/,
 sm_DptCO2_2_TDpGtC           "convert $/tCO2 to T$/GtC: 44/12/1000"    /0.00366667/,
+sm_TDpGtC_2_DptC             "convert T$/GtC to $/tC"                  /1000/,
 s_NO2_2_N                    "convert NO2 to N [14 / (14 + 2 * 16)]"   / .304 /
 sm_tgn_2_pgc                 "conversion factor 100-yr GWP from TgN to PgCeq"
 sm_tgch4_2_pgc               "conversion factor 100-yr GWP from TgCH4 to PgCeq"
@@ -682,6 +686,7 @@ s_gwpN2O_AR4                 "Global Warming Potentials of N2O as in the AR4, us
 *** monetary units
 s_DpKWa_2_TDpTWa             "convert Dollar per kWa to Tera Dollar per TWa" /0.001/
 s_DpKW_2_TDpTW               "convert Dollar per kW to Tera Dollar per TW"   /0.001/
+sm_TDpBillion_2_DpCapita     "convert T$/billion people to $/capita"   /1000/,
 s_D2010_2_D2017              "Convert US$2010 to US$2017"      /1.1491/
 sm_D2015_2_D2017             "Convert US$2015 to US$2017"      /1.0292/
 sm_D2005_2_D2017             "Convert US$2005 to US$2017"      /1.231/
@@ -732,8 +737,8 @@ $endif
 
 
 *** calculate further conversion factors for emissions
-sm_tgn_2_pgc = (44/28) * s_gwpN2O * (12/44) * 0.001;
-sm_tgch4_2_pgc = s_gwpCH4 * (12/44) * 0.001;
+sm_tgn_2_pgc = (44/28) * s_gwpN2O * (12/44) * sm_tg_2_pg;
+sm_tgch4_2_pgc = s_gwpCH4 * (12/44) * sm_tg_2_pg;
 
 
 

@@ -95,7 +95,7 @@ macro_runtimeLog("GAMS")
 ***     Track of changes between iterations
 ***---------------------------------------------------------
 loop(entyPe$(NOT sameas(entyPe,"peur")),
-  o_negitr_cumulative_peprod(iteration,entyPe) = sm_TWa_2_EJ / 1000
+  o_negitr_cumulative_peprod(iteration,entyPe) = sm_TWa_2_ZJ
     * sum(regi,
         sum(ttot$( (ttot.val lt 2100) AND (ttot.val gt 2005)), vm_prodPe.l(ttot,regi,entyPe) * pm_ts(ttot)  )
         + sum(ttot$(ttot.val eq 2005), vm_prodPe.l(ttot,regi,entyPe) * pm_ts(ttot) * 0.5  )
