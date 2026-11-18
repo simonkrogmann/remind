@@ -5,90 +5,112 @@
 # |  REMIND License Exception, version 1.0 (see LICENSE file).
 # |  Contact: remind@pik-potsdam.de
 
-create_input_for_technoeconomic <- function(cfg, remindPath = ".") {
+# Techno-economic data from POSTED (https://github.com/PhilippVerpoort/posted)
+#
+# technoeconomic/content.py fetches the values configured in its QUERIES from
+# POSTED and calculates the properties with TEAM
+# (https://github.com/PhilippVerpoort/team), technoeconomic/create_input.py
+# writes them into core/input/f_technoeconomic.csv, which core/datainput.gms
+# reads to replace values from generisdata_tech.prn. The csv is committed and
+# records in its header which POSTED and TEAM commits and which version of the
+# scripts produced it.
+#
+# Checking is done by create_input.py --check run with 'uv run --no-sync',
+# technoeconomicCheck returns its exit code and message: 0 up to date, 1
+# outdated, 3 an editable install rebuilds the csv on every run, NA if uv or its
+# .venv is missing.
+# checkTechnoeconomicInput turns code 1 into the message that
+# scripts/start/prepare.R and the tests stop on, reports 3 and NA and ignores
+# them, and stops on any other exit code, which means the check did not run
+# through. create_input_for_technoeconomic regenerates the csv with 'uv run',
+# which syncs the .venv with the POSTED and TEAM commits pinned in
+# pyproject.toml, the only place where REMIND touches the Python environment.
+# It never does so without an environment to run in, and never skips it while an
+# editable install rebuilds the csv on every run.
+#
+# Standalone: Rscript scripts/input/create_input_for_technoeconomic.R [remindPath] [--force]
 
-  # ---- run the Python fetch. It writes global data only, no regional
-  # ---- aggregation happens there, it is done below with madrat.
-
-  pythonBin <- "python3"
-  if (! is.null(cfg$pythonPath) && nzchar(cfg$pythonPath)) {
-    pythonDir <- path.expand(sub("[/]$", "", cfg$pythonPath))
-    pythonBin <- if (identical(.Platform$OS.type, "windows")) {
-      file.path(pythonDir, "python.exe")
-    } else {
-      file.path(pythonDir, "bin", "python")
-    }
-    if (! file.exists(pythonBin)) {
-      stop("No Python interpreter found in cfg$pythonPath ('", cfg$pythonPath,
-           "') - correct cfg$pythonPath or set it to '' to use the system Python.")
-    }
+# run create_input.py --check without touching the environment, returns its
+# exit code and message, code NA without uv or its .venv
+technoeconomicCheck <- function(remindPath = ".") {
+  remindPath <- normalizePath(remindPath, mustWork = FALSE)
+  uv <- Sys.which("uv")
+  if (! nzchar(uv) || ! dir.exists(file.path(remindPath, ".venv"))) {
+    return(list(status = NA_integer_,
+                message = paste("Neither uv nor its .venv were found, core/input/f_technoeconomic.csv",
+                                "is used as committed and unchecked. Run 'uv sync' to check it.")))
   }
-
-  scriptfile <- file.path(remindPath, "technoeconomic", "posted.py")
-  rawfile <- file.path(remindPath, "technoeconomic", "technoeconomic-raw.csv")
-  cat("Running", pythonBin, scriptfile, "...\n")
-  output <- system2(pythonBin, shQuote(scriptfile), stdout = TRUE, stderr = TRUE)
-  cat(paste(output, collapse = "\n"), "\n")
-  if (! is.null(attr(output, "status")) && attr(output, "status") != 0) {
-    stop("Failed to run ", scriptfile, ". Is POSTED installed? See ",
-         "config/py_requirements.txt and make create-conda.")
-  }
-
-  # ---- aggregate regions to the REMIND region resolution
-
-  raw <- read.delim(rawfile, sep = ";")
-  mappingfile <- file.path(remindPath, if (is.null(cfg$regionmapping)) "config/regionmappingH12.csv" else cfg$regionmapping)
-  mapping <- madrat::toolGetMapping(mappingfile)
-  if (all(raw$region == "global")) {
-    # POSTED TEDFs without regional resolution: broadcast global values to
-    # all REMIND regions.
-    globalrows <- raw[raw$region == "global", , drop = FALSE]
-    raw <- do.call(rbind, lapply(sort(unique(mapping$RegionCode)), function(regionsub) {
-      newrows <- globalrows
-      newrows$region <- regionsub
-      newrows
-    }))
-  } else {
-    mapped <- mapping$RegionCode[match(raw$region, mapping$CountryCode)]
-    raw$region <- ifelse(is.na(mapped) & raw$region %in% mapping$RegionCode,
-                         raw$region, mapped)
-    if (anyNA(raw$region)) {
-      stop("These POSTED regions are unknown in ", mappingfile, ": ",
-           paste(sort(unique(raw$region[is.na(raw$region)])), collapse = ", "))
-    }
-  }
-  agg <- aggregate(value ~ property + tech + year + region, data = raw, FUN = median)
-  agg <- agg[order(agg$property, agg$tech, agg$year, agg$region), ]
-
-  # ---- write technoeconomic.csv and copy it into core/input
-
-  units <- sapply(sort(unique(raw$property)), function(prop) {
-    paste0(prop, " (", raw$unit[raw$property == prop][1], ")")
-  })
-  header <- c(
-    "* Techno-economic data fetched from POSTED (https://github.com/PhilippVerpoort/posted),",
-    "* medians across all sources. Read by core/datainput.gms into p_technoeconomic.",
-    paste0("* POSTED version: ", cfg$postedVersion),
-    paste("* created:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
-          "by scripts/input/create_input_for_technoeconomic.R",
-          "using technoeconomic/posted.py,",
-          paste0("regionmapping ", basename(mappingfile), ".")),
-    paste0("* units: ", paste(units, collapse = ", "), "."),
-    "* data columns: property,tech,year,region,value"
-  )
-  records <- with(agg, paste(property, tech, year, region,
-                             trimws(format(value, digits = 6)), sep = ","))
-  outfile <- file.path(remindPath, "technoeconomic", "technoeconomic.csv")
-  writeLines(c(header, records), outfile)
-  copied <- file.copy(outfile, file.path(remindPath, "core", "input"), overwrite = TRUE)
-  if (! copied) stop("Could not copy ", outfile, " to core/input/.")
-  cat("Wrote", nrow(agg), "values to", outfile, "and core/input/", basename(outfile), "\n")
+  scriptfile <- file.path(remindPath, "technoeconomic", "create_input.py")
+  # 127 for a uv that vanished after Sys.which, or a wd which does not exist,
+  # so that checkTechnoeconomicInput stops on it in a controlled way
+  result <- tryCatch(
+    processx::run(uv, c("run", "--no-sync", "python", scriptfile, "--check"),
+                  wd = remindPath, error_on_status = FALSE),
+    error = function(e) list(status = 127L, stdout = e$message, stderr = ""))
+  list(status = result$status, message = sub("\n+$", "", paste0(result$stdout, result$stderr)))
 }
 
-if (! interactive() && any(grepl("^--file=", commandArgs(trailingOnly = FALSE)))) {
-  remindPath <- "."
+checkTechnoeconomicInput <- function(remindPath = ".") {
+  check <- technoeconomicCheck(remindPath)
+  if (identical(check$status, 1L)) return(check$message)
+  # stay silent while everything is fine, report the codes that mean the csv
+  # was not checked: 3 editable install, NA no uv or .venv
+  if (is.na(check$status) || check$status %in% c(0L, 3L)) {
+    if (! identical(check$status, 0L) && nzchar(check$message)) message(check$message)
+    return(NULL)
+  }
+  # any other code means the check itself did not run through
+  stop("technoeconomic/create_input.py --check exited with code ", check$status,
+       ":\n", check$message)
+}
+
+# create the csv from POSTED, 'uv run' syncs the .venv with pyproject.toml
+create_input_for_technoeconomic <- function(remindPath = ".", force = FALSE) {
+  remindPath <- normalizePath(remindPath, mustWork = FALSE)
+  scriptfile <- file.path(remindPath, "technoeconomic", "create_input.py")
+  datafile <- file.path(remindPath, "core", "input", "f_technoeconomic.csv")
+
+  check <- technoeconomicCheck(remindPath)
+  if (identical(check$status, 0L) && ! force) {
+    message(check$message, " Use force = TRUE to refetch.")
+    return(invisible(datafile))
+  }
+  # without uv or its .venv nothing can be fetched, the committed csv stays as it
+  # is. Every other code regenerates, 1 outdated and 3 editable install both do.
+  if (is.na(check$status)) {
+    message(check$message, " ", datafile, " is not regenerated.")
+    return(invisible(NULL))
+  }
+  if (! identical(check$status, 1L) && nzchar(check$message)) message(check$message)
+  uv <- Sys.which("uv")
+  message("Fetching techno-economic data from POSTED with ", uv, " run.")
+  result <- tryCatch(
+    # uv run syncs the .venv with pyproject.toml before running the script
+    processx::run(uv, c("run", "python", scriptfile, "--out", datafile),
+                  wd = remindPath, error_on_status = FALSE),
+    error = function(e) list(status = 127L, stdout = e$message, stderr = ""))
+  cat(paste0(result$stdout, result$stderr))
+  if (! identical(result$status, 0L)) {
+    stop(scriptfile, " failed, see its output above.")
+  }
+  # code 1 means the fetch did not produce what was expected, code 3 reports
+  # that an editable install wrote the file, so it must not be committed
+  after <- technoeconomicCheck(remindPath)
+  if (identical(after$status, 1L)) stop("After fetching: ", after$message)
+  if (identical(after$status, 0L)) {
+    message("Wrote ", datafile, ". Commit it together with technoeconomic/create_input.py ",
+            "and content.py (git add -f core/input/f_technoeconomic.csv, the folder is git-ignored).")
+  } else if (nzchar(after$message)) {
+    message(after$message)
+  }
+  invisible(datafile)
+}
+
+# run standalone, not when this file is only sourced by prepare.R or a test
+if (! interactive() && any(grepl("^--file=.*create_input_for_technoeconomic\\.R$", commandArgs(trailingOnly = FALSE)))) {
   args <- commandArgs(trailingOnly = TRUE)
-  if (length(args) > 0) remindPath <- args[1]
-  cfg <- gms::readDefaultConfig(remindPath)
-  create_input_for_technoeconomic(cfg, remindPath = remindPath)
+  force <- "--force" %in% args
+  args <- grep("^--", args, value = TRUE, invert = TRUE)
+  remindPath <- if (length(args) > 0) args[1] else "."
+  create_input_for_technoeconomic(remindPath = remindPath, force = force)
 }

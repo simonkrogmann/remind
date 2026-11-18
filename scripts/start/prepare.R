@@ -109,11 +109,6 @@ prepare <- function() {
     create_input_for_50_damage_exogenous(as.character(cfg$files2export$start["input_damage.gdx"]))
   }
 
-  # Fetch techno-economic data from POSTED into core/input/technoeconomic.csv
-  cat("\nRun scripts/input/create_input_for_technoeconomic.R to fetch techno-economic data from POSTED.\n")
-  source("scripts/input/create_input_for_technoeconomic.R")
-  create_input_for_technoeconomic(cfg, remindPath = cfg$remind_folder)
-
   # Update module paths in GAMS code
   update_modules_embedding()
 
@@ -153,6 +148,12 @@ prepare <- function() {
   ############ download and distribute input data ########
   # check whether the regional resolution and input data revision are outdated and update data if needed
   cfg <- updateInputData(cfg, remindPath = ".")
+
+  # check that the committed POSTED data in core/input/f_technoeconomic.csv matches
+  # technoeconomic/create_input.py and the POSTED commit pinned in pyproject.toml
+  source("scripts/input/create_input_for_technoeconomic.R")
+  technoeconomicProblem <- checkTechnoeconomicInput(".")
+  if (! is.null(technoeconomicProblem)) stop(technoeconomicProblem)
 
   ############ update information ########################
   # update_info, which regional resolution and input data revision in tmpModelFile
