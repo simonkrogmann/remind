@@ -149,6 +149,12 @@ prepare <- function() {
   # check whether the regional resolution and input data revision are outdated and update data if needed
   cfg <- updateInputData(cfg, remindPath = ".")
 
+  # check that the committed POSTED data in core/input/f_technoeconomic.csv matches
+  # technoeconomic/create_input.py and the POSTED commit pinned in pyproject.toml
+  source("scripts/input/create_input_for_technoeconomic.R")
+  technoeconomicProblem <- checkTechnoeconomicInput(".")
+  if (! is.null(technoeconomicProblem)) stop(technoeconomicProblem)
+
   ############ update information ########################
   # update_info, which regional resolution and input data revision in tmpModelFile
   update_info(madrat::regionscode(cfg$regionmapping), cfg$inputRevision, cfg$model_version)
