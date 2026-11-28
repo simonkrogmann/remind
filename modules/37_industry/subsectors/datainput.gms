@@ -6,7 +6,9 @@
 *** |  Contact: remind@pik-potsdam.de
 *** SOF ./modules/37_industry/subsectors/datainput.gms
 
-vm_emiIndBase.l(ttot,regi,entyFe,secInd37) = 0;
+
+
+
 
 Parameters
 
@@ -238,6 +240,9 @@ loop (industry_ue_calibration_target_dyn37(out),
 );
 display p37_energy_limit_def, p37_energy_limit_slope;
 $endif.no_calibration
+
+*** initialize baseline industry emissions before CCS to 0
+vm_emiIndBase.l(ttot,regi,entyFe,secInd37) = 0;
 
 *** CCS for industry is off by default
 emiMacSector(emiInd37_fuel) = NO;
@@ -578,49 +583,6 @@ if (smax((t,regi),
 putclose logfile, " " /;
 );
 
-$ifthen.sec_steel_scen NOT "%cm_steel_secondary_max_share_scenario%" == "off"   !! cm_steel_secondary_max_share_scenario
-* Modify secondary steel share limits by scenario assumptions
-
-$ifthen.calibrate "%CES_parameters%" == "calibrate"   !! CES_parameters
-* Abort if scenario limits are to be prescribed during calibration.
-$abort "cm_steel_secondary_max_share_scenario != off is incompatible with calibration"
-$endif.calibrate
-
-* Protect against the prescription of seconday steel shares in historic/fixed
-* time steps.
-if (smax((t,regi)$( t.val le max(cm_startyear, 2020) ),
-      p37_steel_secondary_max_share_scenario(t,regi)),
-  put logfile;
-  put "Error: cm_steel_secondary_max_share_scenario scaling before ",
-      "cm_startyear/2020" /;
-  loop ((t,regi)$(    t.val le max(cm_startyear, 2020)
-                  AND p37_steel_secondary_max_share_scenario(t,regi) ),
-    put p37_steel_secondary_max_share_scenario.tn(t,regi), " = ",
-        p37_steel_secondary_max_share_scenario(t,regi) /;
-  );
-  putclose logfile " " /;
-
-  execute_unload "abort.gdx";
-  abort "Faulty cm_steel_secondary_max_share_scenario scaling. See .log file for details.";
-);
-
-* Modify limits on secondary steel shares.  Linear fade from calibration limits
-* to scenario limits.
-loop ((regi,t2)$( p37_steel_secondary_max_share_scenario(t2,regi) ),
-  loop (t3$( t3.val eq max(cm_startyear, 2020) ),
-    loop (t,
-      sm_tmp = max(0, min(1, (t.val - t3.val) / (t2.val - t3.val)));
-
-      p37_steel_secondary_max_share(t,regi)
-      = (p37_steel_secondary_max_share(t,regi)           * (1 - sm_tmp))
-      + (p37_steel_secondary_max_share_scenario(t2,regi) * sm_tmp      );
-    );
-  );
-);
-
-display "scenario limits for maximum secondary steel share",
-        p37_steel_secondary_max_share;
-$endif.sec_steel_scen
 Parameter p37_chemicals_feedstock_share(ttot,all_regi)   "minimum share of feso/feli/fega in total chemicals FE input [0-1]"
   /
 $ondelim
@@ -639,6 +601,35 @@ loop((ttot,ext_regi)$p37_wasteIncinerationCCSMaxShare(ttot,ext_regi),
   );
 );
 $endIf.cm_wasteIncinerationCCSshare
+
+
+*** Feedstock Input Data -----------------------------------------------------
+
+*** Read non-energy emissions factors for the chemical industry.
+*** These factors are based on IEA feedstock flows and UNFCCC process
+*** emissions data and are converted from GtC/ZJ to GtC/TWa.
+parameter f37_nechem_emissionFactors(ttot,all_regi,*) "non-energy emission factors [GtC per ZJ]"
+/
+$ondelim
+$include "./modules/37_industry/subsectors/input/f_nechem_emissionFactors.cs4r"
+$offdelim
+/;
+
+p37_emifacNonEnergy(ttot,regi,"sesofos","fesos","indst","co2")
+  = f37_nechem_emissionFactors(ttot,regi,"solids") / sm_ZJ_2_TWa;
+p37_emifacNonEnergy(ttot,regi,"seliqfos","fehos","indst","co2")
+  = f37_nechem_emissionFactors(ttot,regi,"liquids") / sm_ZJ_2_TWa;
+p37_emifacNonEnergy(ttot,regi,"segafos","fegas","indst","co2")
+  = f37_nechem_emissionFactors(ttot,regi,"gases") / sm_ZJ_2_TWa;
+
+*** Read projections for the share of plastic waste that is incinerated.
+parameter f37_incinerationShares(ttot,all_regi) "incineration rate of plastic waste"
+/
+$ondelim
+$include "./modules/37_industry/subsectors/input/f_incinerationShares.cs4r"
+$offdelim
+/;
+p37_incinerationRate(ttot,all_regi) = f37_incinerationShares(ttot,all_regi);
 
 *** ---------------------------------------------------------------------------
 ***        2. Process-Based

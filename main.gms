@@ -258,6 +258,10 @@ $setGlobal PE_FE_parameters  iea2014  !! def = iea2014
 *'
 *' * (on):      load existing CES parameters matching model configuration
 $setGlobal initialCap  on             !! def = on
+*'---------------------    10_emissions    ------------------------------------
+*'
+*' * (SectorAggregates): traditional structure of emissions calculation that was used in REMIND core
+$setGlobal emissions  SectorAggregates  !! def = SectorAggregates
 *'---------------------    11_aerosols    --------------------------------------
 *'
 *' * (exoGAINS2025):  new realization with base year 2020 based on cleaned GAINS2025 data that enables to choose between CEDS and GAINS as source for baseyear emissions
@@ -621,9 +625,9 @@ parameter
 *' * (0): no lower bound
 *'
 parameter
-  c_macscen                 "scenario switch on whether or not to use MAC (Marginal Abatement Cost) for certain sectors not related to direct combustion of fossil fuel, e.g. fugitive emissions from old mines, forestry, agriculture and cement"
+  cm_macscen                 "scenario switch on whether or not to use MAC (Marginal Abatement Cost) for certain sectors not related to direct combustion of fossil fuel, e.g. fugitive emissions from old mines, forestry, agriculture and cement"
 ;
-  c_macscen         = 1;               !! def = 1  !! regexp = 1|2
+  cm_macscen         = 1;               !! def = 1  !! regexp = 1|2
 *' * (1): on
 *' * (2): off
 *'
@@ -909,9 +913,9 @@ parameter
   cm_rentconvcoal     = 50;        !! def = 50
 *'
 parameter
-  c_cint_scen               "additional GHG emissions from mining fossil fuels"
+  cm_cint_scen               "additional GHG emissions from mining fossil fuels"
 ;
-  c_cint_scen           = 1;         !! def = 1  !! regexp = 0|1
+  cm_cint_scen           = 1;         !! def = 1  !! regexp = 0|1
 *' *  (0): switch is off (emissions are not accounted)
 *' *  (1): switch is on (emissions are accounted)
 *'
@@ -940,10 +944,10 @@ parameter
 *' *   (6) intermediate estimate: 0.0022; max 8.6 GtCO2/yr globally
 *'
 parameter
-  c_ccscapratescen          "CCS capture rate"
+  cm_ccscapratescen          "CCS capture rate"
 ;
-  c_ccscapratescen      = 1;         !! def = 1  !! regexp = 1|2
-*' This flag determines the CO2 capture rate of selected CCS technologies
+  cm_ccscapratescen      = 1;         !! def = 1  !! regexp = 1|2
+*' This flag determines the CO2 capture rate of selected carbon capture technologies
 *' *   (1) reference (90%)
 *' *   (2) increased capture rate (99%)
 *'
@@ -1640,10 +1644,6 @@ $setGlobal cm_quantity_regiCO2target  off !! def = off
 *** Setting capacity factors free is numerically expensive but can be helpful to see if negative prices disappear in historic years as the model is allowed to dispatch.
 $setGlobal cm_dispatchSetyDown  off   !! def = off  The amount that te producing any sety can dispatch less (in percent) - so setting "20" in a cm_dispatchSetyDown column in scenario_config will allow the model to reduce the output of this te by 20%
 *** cm_dispatchSeelDown <- "off", same as cm_dispatchSetyDown but only provides range to capacity factors of electricity generation technologies
-*** cm_steel_secondary_max_share_scenario
-*** defines maximum secondary steel share per region
-*** Share is faded in from cm_startyear or 2020 to the denoted level by region/year.
-*** Example: "2040.EUR 0.6" will cap the share of secondary steel production at 60 % in EUR from 2040 onwards
 $setGlobal cm_dispatchSeelDown  off   !! def = off  The amount that te producing seel can dispatch less (in percent) (overrides cm_dispatchSetyDown for te producing seel)
 *' *   cm_NucRegiPol "enable European region specific nuclear phase-out and new capacitiy constraints"
 $setGlobal cm_NucRegiPol   on   !! def = on
@@ -1761,9 +1761,6 @@ $setglobal cm_floorCostScen gdpBased       !! def = gdpBased  !! regexp = unifor
 ***  ("HydrHype4") similar to Mix4 but with a strong focus on FCEVs in both passenger and freight sectors.
 ***  This information has been added on 4.10.22. Please contact the transport sector experts for more detail.
 $setGlobal cm_EDGEtr_scen  Mix2ICEban  !! def = Mix2ICEban
-*** industry
-*** maximum secondary steel share
-$setglobal cm_steel_secondary_max_share_scenario  off !! def off , switch on for maximum secondary steel share
 *** cm_import_tax
 *** set tax on imports for specific regions on traded energy carriers
 *** as a fraction of import price
@@ -2211,7 +2208,7 @@ $setglobal cm_taxrc_RE  none   !! def = none   !! regexp = none|REdirect
 *' (2020): Uses CEDS2024 data with 2020 as base year, and Harmsen et al. 2022 IMAGE for N2O baselines
 $setGlobal cm_emifacs_baseyear  2020          !! def = 2005
 *** Switches to choose Marginal Abatement Cost Curves (MACCs) version (PBL_2007, PBL_2022) and scenarios (Default, Pessismistic, Optimistic)
-$setGlobal c_nonco2_macc_version  PBL_2022    !! def = PBL_2007
+$setGlobal cm_nonco2_macc_version  PBL_2022    !! def = PBL_2007
 $setGlobal c_nonco2_macc_scenario  Default     !! def = Default
 *** China-specific brownfield planning pipeline (informed by Global energy monitor and pypsa capacity pipeline data, off by default)
 $setGlobal cm_chaCoalBounds off    !! def = off
